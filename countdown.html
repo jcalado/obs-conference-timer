@@ -85,6 +85,49 @@
             75% { opacity: 0.3; transform: scale(1.05); }
         }
 
+        #gameOverOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            pointer-events: none;
+            background: rgba(0, 0, 0, 0.85);
+        }
+
+        #gameOverOverlay.active {
+            display: flex;
+        }
+
+        #gameOverText {
+            font-size: 20vw;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 0.1em;
+            text-shadow:
+                0 0 20px rgba(255, 0, 0, 0.8),
+                0 0 40px rgba(255, 0, 0, 0.6),
+                0 0 60px rgba(255, 0, 0, 0.4);
+            animation: gameOverFlash 0.8s ease-in-out infinite;
+        }
+
+        @keyframes gameOverFlash {
+            0%, 100% {
+                opacity: 1;
+                color: #ff0000;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.3;
+                color: #ffffff;
+                transform: scale(1.02);
+            }
+        }
+
         .controls {
             position: fixed;
             bottom: 20px;
@@ -133,6 +176,10 @@
         <div id="label"></div>
         <div id="timer">00:00</div>
         <div id="message"></div>
+    </div>
+
+    <div id="gameOverOverlay">
+        <div id="gameOverText">GAME OVER</div>
     </div>
 
     <div class="controls" id="controls">
@@ -424,6 +471,15 @@
                                 timerEl.classList.remove('flashing');
                             }
                         }, 500);
+                        break;
+                    case 'gameOver':
+                        // Toggle GAME OVER flashing overlay
+                        const gameOverOverlay = document.getElementById('gameOverOverlay');
+                        if (value) {
+                            gameOverOverlay.classList.add('active');
+                        } else {
+                            gameOverOverlay.classList.remove('active');
+                        }
                         break;
                 }
 

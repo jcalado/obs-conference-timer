@@ -185,6 +185,25 @@
             background: #7B1FA2;
         }
 
+        button.gameover {
+            background: #ff0000;
+            animation: pulse-red 1s ease-in-out infinite;
+        }
+
+        button.gameover:hover {
+            background: #cc0000;
+        }
+
+        button.gameover.active {
+            background: #ff0000;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
         .input-group {
             display: flex;
             gap: 6px;
@@ -303,6 +322,9 @@
                     </div>
                     <div class="button-group full" style="margin-top: 6px;">
                         <button class="preset" onclick="flashTimer()">⚡ Flash Timer</button>
+                    </div>
+                    <div class="button-group full" style="margin-top: 6px;">
+                        <button class="gameover" id="gameOverBtn" onclick="toggleGameOver()">🎮 GAME OVER (OFF)</button>
                     </div>
                 </div>
 
@@ -493,6 +515,23 @@
 
         function flashTimer() {
             sendCommand('flashTimer');
+        }
+
+        let gameOverActive = false;
+
+        function toggleGameOver() {
+            gameOverActive = !gameOverActive;
+            const btn = document.getElementById('gameOverBtn');
+
+            if (gameOverActive) {
+                btn.textContent = '🎮 GAME OVER (ON)';
+                btn.classList.add('active');
+                sendCommand('gameOver', true);
+            } else {
+                btn.textContent = '🎮 GAME OVER (OFF)';
+                btn.classList.remove('active');
+                sendCommand('gameOver', false);
+            }
         }
 
         function setCustomDuration() {
