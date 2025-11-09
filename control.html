@@ -236,6 +236,68 @@
             display: block;
         }
 
+        .collapsible-panel {
+            margin-bottom: 8px;
+        }
+
+        .collapsible-toggle {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+            background: #2d2d2d;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 11px;
+            color: #bbb;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        .collapsible-toggle:focus-visible {
+            outline: 2px solid #4CAF50;
+            outline-offset: 2px;
+        }
+
+        .collapsible-toggle .chevron {
+            font-size: 12px;
+            transition: transform 0.2s ease;
+        }
+
+        .collapsible-panel .collapsible-content {
+            display: none;
+            margin-top: 6px;
+        }
+
+        .collapsible-panel.is-open .collapsible-content,
+        .collapsible-panel.force-open .collapsible-content {
+            display: block;
+        }
+
+        .collapsible-panel.is-open .collapsible-toggle .chevron,
+        .collapsible-panel.force-open .collapsible-toggle .chevron {
+            transform: rotate(180deg);
+        }
+
+        @media (min-width: 641px) {
+            .collapsible-panel {
+                margin-bottom: 0;
+                display: contents;
+            }
+
+            .collapsible-panel .collapsible-toggle {
+                display: none;
+            }
+
+            .collapsible-panel .collapsible-content {
+                display: contents;
+                margin-top: 0;
+            }
+        }
+
         /* Landscape/Wide Layout Optimization */
         @media (min-aspect-ratio: 16/9) {
             body {
@@ -315,16 +377,16 @@
                 <div class="section">
                     <div class="section-title">Main Controls</div>
                     <div class="button-group">
-                        <button class="start" onclick="sendCommand('start')">Start</button>
-                        <button class="pause" onclick="sendCommand('pause')">Pause</button>
-                        <button class="stop" onclick="sendCommand('stop')">Stop</button>
-                        <button class="reset" onclick="sendCommand('reset')">Reset</button>
+                        <button class="start" onclick="startTimer()">Start</button>
+                        <button class="pause" onclick="pauseTimer()">Pause</button>
+                        <button class="stop" onclick="stopTimer()">Stop</button>
+                        <button class="reset" onclick="resetTimer()">Reset</button>
                     </div>
                     <div class="button-group full" style="margin-top: 6px;">
-                        <button class="preset" onclick="flashTimer()">⚡ Flash Timer</button>
+                        <button class="preset" onclick="flashTimer()">Flash Timer</button>
                     </div>
                     <div class="button-group full" style="margin-top: 6px;">
-                        <button class="gameover" id="gameOverBtn" onclick="toggleGameOver()">🎮 GAME OVER (OFF)</button>
+                        <button class="gameover" id="gameOverBtn" onclick="toggleGameOver()">GAME OVER (OFF)</button>
                     </div>
                 </div>
 
@@ -370,49 +432,104 @@
                         <button class="stop" onclick="clearMessage()">Clear</button>
                     </div>
                 </div>
+                <div class="collapsible-panel" id="obsCollapsible">
+                    <button type="button" class="collapsible-toggle" id="obsCollapsibleToggle" aria-expanded="false" aria-controls="obsCollapsibleContent">
+                        <span>OBS Controls</span>
+                        <span class="chevron">&#9662;</span>
+                    </button>
+                    <div class="collapsible-content" id="obsCollapsibleContent">
+                        <div class="section">
+                            <div class="section-title">OBS Settings</div>
+                            <div class="input-group">
+                                <input type="text" id="obsHost" placeholder="Host" value="localhost" style="flex: 0.8;">
+                                <input type="text" id="obsPort" placeholder="Port" value="4455" style="flex: 0.5;">
+                            </div>
+                            <div class="input-group" style="margin-top: 6px;">
+                                <input type="password" id="obsPassword" placeholder="Password (optional)">
+                                <button class="start" onclick="connectOBS()" id="obsConnectBtn">Connect</button>
+                            </div>
+                            <div id="obsStatus" style="font-size: 10px; color: #888; margin-top: 4px; text-align: center;"></div>
+                        </div>
 
-                <div class="section">
-                    <div class="section-title">OBS Settings</div>
-                    <div class="input-group">
-                        <input type="text" id="obsHost" placeholder="Host" value="localhost" style="flex: 0.8;">
-                        <input type="text" id="obsPort" placeholder="Port" value="4455" style="flex: 0.5;">
+                        <div class="section" id="obsSourcesSection" style="display: none;">
+                            <div class="section-title">
+                                OBS Source Control
+                                <button onclick="refreshSources()" style="float: right; padding: 2px 8px; font-size: 9px; background: #607D8B; color: white; border: none; border-radius: 3px; cursor: pointer;">&#8635; Refresh</button>
+                            </div>
+                            <div style="margin-bottom: 6px;">
+                                <label style="font-size: 10px; color: #888;">Scene:</label>
+                                <select id="sceneSelect" onchange="changeScene()" style="width: 100%; padding: 4px; background: #1e1e1e; color: white; border: 1px solid #444; border-radius: 4px; font-size: 11px; margin-top: 2px;">
+                                    <option>Loading scenes...</option>
+                                </select>
+                            </div>
+                            <div id="obsSources" style="font-size: 11px; color: #888;">
+                                Connect to OBS to see sources
+                            </div>
+                        </div>
                     </div>
-                    <div class="input-group" style="margin-top: 6px;">
-                        <input type="password" id="obsPassword" placeholder="Password (optional)">
-                        <button class="start" onclick="connectOBS()" id="obsConnectBtn">Connect</button>
-                    </div>
-                    <div id="obsStatus" style="font-size: 10px; color: #888; margin-top: 4px; text-align: center;"></div>
                 </div>
 
-                <div class="section" id="obsSourcesSection" style="display: none;">
-                    <div class="section-title">
-                        OBS Source Control
-                        <button onclick="refreshSources()" style="float: right; padding: 2px 8px; font-size: 9px; background: #607D8B; color: white; border: none; border-radius: 3px; cursor: pointer;">⟳ Refresh</button>
-                    </div>
-                    <div style="margin-bottom: 6px;">
-                        <label style="font-size: 10px; color: #888;">Scene:</label>
-                        <select id="sceneSelect" onchange="changeScene()" style="width: 100%; padding: 4px; background: #1e1e1e; color: white; border: 1px solid #444; border-radius: 4px; font-size: 11px; margin-top: 2px;">
-                            <option>Loading scenes...</option>
-                        </select>
-                    </div>
-                    <div id="obsSources" style="font-size: 11px; color: #888;">
-                        Connect to OBS to see sources
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 
     <script>
-        let channel = null;
-        let lastStateTime = 0;
+        const DEFAULT_DURATION = 600;
+        const DISPLAY_TIMEOUT = 4000;
+        const STATE_PUSH_INTERVAL = 2000;
 
-        // Parse time (supports seconds and mm:ss format)
+        let channel = null;
+        let timerInterval = null;
+        let lastDisplayHeartbeat = 0;
+
+        const timerState = {
+            duration: DEFAULT_DURATION,
+            timeRemaining: DEFAULT_DURATION,
+            timeElapsed: 0,
+            isRunning: false,
+            mode: 'countdown',
+            countUp: false,
+            message: '',
+            flashSignal: 0,
+            gameOver: false
+        };
+
+        const obsCollapsible = document.getElementById('obsCollapsible');
+        const obsCollapsibleToggle = document.getElementById('obsCollapsibleToggle');
+        const OBS_COLLAPSE_BREAKPOINT = 640;
+
+        if (obsCollapsible && obsCollapsibleToggle) {
+            const updateObsCollapsibleForViewport = () => {
+                const isNarrow = window.innerWidth <= OBS_COLLAPSE_BREAKPOINT;
+                if (!isNarrow) {
+                    obsCollapsible.classList.add('force-open', 'is-open');
+                    obsCollapsibleToggle.setAttribute('aria-expanded', 'true');
+                } else {
+                    obsCollapsible.classList.remove('force-open');
+                    const expanded = obsCollapsible.classList.contains('is-open');
+                    obsCollapsibleToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+                }
+            };
+
+            obsCollapsibleToggle.addEventListener('click', () => {
+                if (obsCollapsible.classList.contains('force-open')) {
+                    return;
+                }
+
+                obsCollapsible.classList.toggle('is-open');
+                const expanded = obsCollapsible.classList.contains('is-open');
+                obsCollapsibleToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            });
+
+            window.addEventListener('resize', updateObsCollapsibleForViewport);
+            updateObsCollapsibleForViewport();
+        }
+
         function parseTime(value) {
             if (!value) return 0;
 
             if (value.includes(':')) {
-                const parts = value.split(':').map(p => parseInt(p) || 0);
+                const parts = value.split(':').map(p => parseInt(p, 10) || 0);
                 if (parts.length === 2) {
                     return parts[0] * 60 + parts[1];
                 } else if (parts.length === 3) {
@@ -420,10 +537,9 @@
                 }
             }
 
-            return parseInt(value) || 0;
+            return parseInt(value, 10) || 0;
         }
 
-        // Format time for display
         function formatTime(seconds) {
             const isNegative = seconds < 0;
             const absSeconds = Math.abs(seconds);
@@ -442,31 +558,6 @@
             return isNegative ? `-${timeString}` : timeString;
         }
 
-        // Initialize BroadcastChannel
-        try {
-            channel = new BroadcastChannel('timer-control');
-
-            // Listen for state updates from timer
-            channel.onmessage = (event) => {
-                if (event.data.type === 'state') {
-                    updateDisplay(event.data);
-                    lastStateTime = Date.now();
-                    updateConnectionStatus(true);
-                }
-            };
-
-            // Check connection status periodically
-            setInterval(() => {
-                const timeSinceLastState = Date.now() - lastStateTime;
-                if (timeSinceLastState > 3000) {
-                    updateConnectionStatus(false);
-                }
-            }, 1000);
-
-        } catch (e) {
-            console.error('BroadcastChannel not available', e);
-        }
-
         function updateConnectionStatus(connected) {
             const badgeEl = document.getElementById('connectionBadge');
             if (connected) {
@@ -476,11 +567,10 @@
             }
         }
 
-        function updateDisplay(state) {
+        function updateDisplay(state = timerState) {
             const displayEl = document.getElementById('timerDisplay');
             const statusEl = document.getElementById('statusText');
 
-            // Update time display
             if (state.mode === 'countdown') {
                 displayEl.textContent = formatTime(state.timeRemaining);
             } else if (state.countUp) {
@@ -489,49 +579,139 @@
                 displayEl.textContent = 'CLOCK MODE';
             }
 
-            // Update status
             if (state.isRunning) {
                 displayEl.className = 'timer-display running';
                 statusEl.textContent = 'RUNNING';
+            } else if (state.timeElapsed === 0 && state.timeRemaining === state.duration) {
+                displayEl.className = 'timer-display stopped';
+                statusEl.textContent = 'STOPPED';
             } else {
                 displayEl.className = 'timer-display paused';
                 statusEl.textContent = 'PAUSED';
             }
         }
 
-        function sendCommand(command, value = null) {
-            if (channel) {
-                channel.postMessage({ command, value });
-            }
+        function broadcastState() {
+            if (!channel) return;
+            channel.postMessage({
+                type: 'state',
+                isRunning: timerState.isRunning,
+                timeRemaining: timerState.timeRemaining,
+                timeElapsed: timerState.timeElapsed,
+                mode: timerState.mode,
+                countUp: timerState.countUp,
+                duration: timerState.duration,
+                message: timerState.message,
+                flashSignal: timerState.flashSignal,
+                gameOver: timerState.gameOver
+            });
         }
 
-        function adjustTime(seconds) {
-            sendCommand('adjustTime', seconds);
+        function syncState() {
+            updateDisplay(timerState);
+            broadcastState();
+        }
+
+        function tick() {
+            if (!timerState.isRunning) {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+                return;
+            }
+
+            if (timerState.mode === 'countdown') {
+                timerState.timeRemaining -= 1;
+                timerState.timeElapsed += 1;
+            } else if (timerState.countUp) {
+                timerState.timeElapsed += 1;
+            }
+
+            syncState();
+        }
+
+        function startTimer() {
+            if (timerState.isRunning) {
+                return;
+            }
+
+            timerState.isRunning = true;
+            if (!timerInterval) {
+                timerInterval = setInterval(tick, 1000);
+            }
+            syncState();
+        }
+
+        function pauseTimer() {
+            if (!timerState.isRunning) {
+                return;
+            }
+
+            timerState.isRunning = false;
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            syncState();
+        }
+
+        function stopTimer() {
+            timerState.isRunning = false;
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            syncState();
+        }
+
+        function resetTimer() {
+            timerState.isRunning = false;
+            timerState.timeRemaining = timerState.duration;
+            timerState.timeElapsed = 0;
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            syncState();
         }
 
         function setDuration(seconds) {
-            sendCommand('setDuration', seconds);
-        }
-
-        function flashTimer() {
-            sendCommand('flashTimer');
-        }
-
-        let gameOverActive = false;
-
-        function toggleGameOver() {
-            gameOverActive = !gameOverActive;
-            const btn = document.getElementById('gameOverBtn');
-
-            if (gameOverActive) {
-                btn.textContent = '🎮 GAME OVER (ON)';
-                btn.classList.add('active');
-                sendCommand('gameOver', true);
-            } else {
-                btn.textContent = '🎮 GAME OVER (OFF)';
-                btn.classList.remove('active');
-                sendCommand('gameOver', false);
+            const secs = Number(seconds);
+            if (!Number.isFinite(secs) || secs <= 0) {
+                return;
             }
+
+            timerState.duration = Math.floor(secs);
+            timerState.timeRemaining = timerState.duration;
+            timerState.timeElapsed = 0;
+            timerState.isRunning = false;
+
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+
+            const durationInput = document.getElementById('customDuration');
+            if (durationInput) {
+                durationInput.value = formatTime(timerState.duration);
+            }
+
+            syncState();
+        }
+
+        function adjustTime(seconds) {
+            const delta = Number(seconds);
+            if (!Number.isFinite(delta)) {
+                return;
+            }
+
+            if (timerState.countUp) {
+                timerState.timeElapsed = Math.max(0, timerState.timeElapsed + delta);
+            } else {
+                timerState.timeRemaining += delta;
+            }
+            syncState();
         }
 
         function setCustomDuration() {
@@ -544,31 +724,138 @@
             }
         }
 
+        function updateMessage(message) {
+            timerState.message = message;
+            const input = document.getElementById('customMessage');
+            if (input && input.value !== message) {
+                input.value = message;
+            }
+            syncState();
+        }
+
         function setCustomMessage() {
             const input = document.getElementById('customMessage');
-            const message = input.value.trim();
-            sendCommand('setMessage', message);
+            updateMessage(input.value.trim());
         }
 
         function clearMessage() {
-            document.getElementById('customMessage').value = '';
-            sendCommand('setMessage', '');
+            const input = document.getElementById('customMessage');
+            if (input) {
+                input.value = '';
+            }
+            updateMessage('');
         }
 
-        // Allow Enter key to set custom duration
+        function flashTimer() {
+            timerState.flashSignal += 1;
+            broadcastState();
+        }
+
+        function updateGameOverButton() {
+            const btn = document.getElementById('gameOverBtn');
+            if (!btn) return;
+
+            if (timerState.gameOver) {
+                btn.textContent = 'GAME OVER (ON)';
+                btn.classList.add('active');
+            } else {
+                btn.textContent = 'GAME OVER (OFF)';
+                btn.classList.remove('active');
+            }
+        }
+
+        function toggleGameOver(forceValue = null) {
+            if (typeof forceValue === 'boolean') {
+                timerState.gameOver = forceValue;
+            } else {
+                timerState.gameOver = !timerState.gameOver;
+            }
+
+            updateGameOverButton();
+            syncState();
+        }
+
+        function handleExternalCommand(command, value = null) {
+            switch (command) {
+                case 'start':
+                    startTimer();
+                    break;
+                case 'pause':
+                    pauseTimer();
+                    break;
+                case 'stop':
+                    stopTimer();
+                    break;
+                case 'reset':
+                    resetTimer();
+                    break;
+                case 'adjustTime':
+                    adjustTime(value);
+                    break;
+                case 'setDuration':
+                    setDuration(value);
+                    break;
+                case 'setMessage':
+                    updateMessage(typeof value === 'string' ? value.trim() : '');
+                    break;
+                case 'flashTimer':
+                    flashTimer();
+                    break;
+                case 'gameOver':
+                    toggleGameOver(Boolean(value));
+                    break;
+            }
+        }
+
         document.getElementById('customDuration').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 setCustomDuration();
             }
         });
 
-        // Allow Enter key to send message
         document.getElementById('customMessage').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 setCustomMessage();
             }
         });
 
+        updateDisplay();
+        updateGameOverButton();
+
+        try {
+            channel = new BroadcastChannel('timer-control');
+
+            channel.onmessage = (event) => {
+                const data = event.data;
+                if (!data || typeof data !== 'object') {
+                    return;
+                }
+
+                if (data.type === 'display-heartbeat') {
+                    lastDisplayHeartbeat = Date.now();
+                    updateConnectionStatus(true);
+                    return;
+                }
+
+                if (data.type === 'command') {
+                    handleExternalCommand(data.command, data.value);
+                }
+            };
+
+            setInterval(() => {
+                if (Date.now() - lastDisplayHeartbeat > DISPLAY_TIMEOUT) {
+                    updateConnectionStatus(false);
+                }
+            }, 1000);
+
+            setInterval(() => {
+                broadcastState();
+            }, STATE_PUSH_INTERVAL);
+
+            broadcastState();
+        } catch (e) {
+            console.error('BroadcastChannel not available', e);
+        }
         // OBS WebSocket Integration
         let obsWs = null;
         let obsRequestId = 1;
@@ -758,7 +1045,7 @@
                 const itemWithParent = {
                     ...item,
                     parentGroup: parentGroup,
-                    displayName: parentGroup ? `  └ ${item.sourceName}` : item.sourceName
+                    displayName: parentGroup ? `  - ${item.sourceName}` : item.sourceName
                 };
                 allItems.push(itemWithParent);
 
@@ -872,3 +1159,12 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
